@@ -37,8 +37,9 @@ class instruction:
 # for copy and pasting parsing for each type
 
 class R_type(instruction):
-    def __init__(self, funct7, rs2, rs1, funct3, rd, opcode):
+    def __init__(self, funct7, rs2, rs1, funct3, rd, opcode, instrName):
         instruction.__init__(self, opcode)
+        self.instrName = instrName
         self.funct7 = funct7
         self.rs2 = "{:05b}".format(rs2)[-5:]
         self.rs1 = "{:05b}".format(rs1)[-5:]
@@ -46,33 +47,48 @@ class R_type(instruction):
         self.rd = "{:05b}".format(rd)[-5:]
         self.instr = self.funct7 + self.rs2 + self.rs1 + self.funct3 + self.rd + self.opcode
 
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2))  + ", x" + str(int(self.rs1, 2))  + ", x" + str(int(self.rs2, 2))
+
 class I_type (instruction):
-    def __init__(self, rs1, funct3, rd, imm, opcode):
+    def __init__(self, rs1, funct3, rd, imm, opcode, instrName):
         instruction.__init__(self, opcode)
+        self.instrName = instrName
         self.imm = "{:032b}".format(imm)[-12:]
         self.rs1 = "{:05b}".format(rs1)[-5:]
         self.rd = "{:05b}".format(rd)[-5:]
         self.funct3 = funct3
         self.instr = self.imm + self.rs1 + self.funct3 + self.rd + self.opcode
+ 
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", x" + str(int(self.rs1, 2)) + ", " + str(int(self.imm, 2))
 
 class S_type (instruction):
-    def __init__(self, rs2, rs1, funct3, imm, opcode):
+    def __init__(self, rs2, rs1, funct3, imm, opcode, instrName):
         instruction.__init__(self, opcode)
+        self.instrName = instrName
         self.imm = "{:032b}".format(imm)[-12:]
         self.rs2 = "{:05b}".format(rs2)[-5:]
         self.rs1 = "{:05b}".format(rs1)[-5:]
         self.funct3 = funct3
         self.instr = self.imm[0:7] + self.rs2 + self.rs1 + self.funct3 + self.imm[7:12] + self.opcode
 
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rs2, 2)) + ", " + str(int(self.imm, 2)) + "(" + str(int(self.rs1, 2)) + ")"
+
 
 class B_type (instruction):
-    def __init__(self, rs2, rs1, funct3, imm, opcode):
+    def __init__(self, rs2, rs1, funct3, imm, opcode, instrName):
         instruction.__init__(self, opcode)
+        self.instrName = instrName
         self.imm = "{:032b}".format(imm)[-13:-1]
         self.rs2 = "{:05b}".format(rs2)[-5:]
         self.rs1 = "{:05b}".format(rs1)[-5:]
         self.funct3 = funct3
         self.instr = self.imm[0] + self.imm[2:8] + self.rs2 + self.rs1 + self.funct3 + self.imm[8:12] + self.imm[1] + self.opcode
+    
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rs1, 2)) + ", x" + str(int(self.rs2, 2)) + ", " + str(int(self.imm, 2) << 1)
 
 class U_type (instruction):
     def __init__(self, rd, imm, opcode, instrName):
@@ -83,7 +99,7 @@ class U_type (instruction):
         self.instr = self.imm + self.rd + self.opcode
 
     def getAssembly(self):
-        return self.instrName + " x" + str(int(self.rd)) + ", " + str(int(self.imm, 2) << 12)
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2) << 12)
 
 class J_type (instruction):
     def __init__(self, rd, imm, opcode, instrName):
@@ -96,7 +112,7 @@ class J_type (instruction):
         self.instr = imm + self.rd + self.opcode
     
     def getAssembly(self):
-        return self.instrName + " x" + str(int(self.rd)) + ", " + str(int(self.imm, 2) << 1)
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2) << 1)
 
 
 # Each instruction should be a child of their specific type
@@ -115,138 +131,162 @@ class JAL (J_type):
 
 class JALR (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "000", rd, imm, "1100111")
+        I_type.__init__(self, rs1, "000", rd, imm, "1100111", "JALR")
 
 class BEQ (B_type):
     def __init__(self, rs2, rs1, imm):
-        B_type.__init__(self, rs2, rs1, "000", imm, "1100011")
-
+        B_type.__init__(self, rs2, rs1, "000", imm, "1100011", "BEQ")
+    
 class BNE (B_type):
     def __init__(self, rs2, rs1, imm):
-        B_type.__init__(self, rs2, rs1, "001", imm, "1100011")
+        B_type.__init__(self, rs2, rs1, "001", imm, "1100011", "BNE")
 
 class BLT (B_type):
     def __init__(self, rs2, rs1, imm):
-        B_type.__init__(self, rs2, rs1, "100", imm, "1100011")
+        B_type.__init__(self, rs2, rs1, "100", imm, "1100011", "BLT")
 
 class BGE (B_type):
     def __init__(self, rs2, rs1, imm):
-        B_type.__init__(self, rs2, rs1, "101", imm, "1100011")
+        B_type.__init__(self, rs2, rs1, "101", imm, "1100011", "BGE")
 
 class BLTU (B_type):
     def __init__(self, rs2, rs1, imm):
-        B_type.__init__(self, rs2, rs1, "110", imm, "1100011")
+        B_type.__init__(self, rs2, rs1, "110", imm, "1100011", "BLTU")
 
 class BGEU (B_type):
     def __init__(self, rs2, rs1, imm):
-        B_type.__init__(self, rs2, rs1, "111", imm, "1100011")
+        B_type.__init__(self, rs2, rs1, "111", imm, "1100011", "BGEU")
 
 class LB (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "000", rd, imm, "0000011")
+        I_type.__init__(self, rs1, "000", rd, imm, "0000011", "LB")
+
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2)) + "(x" + str(int(self.rs1, 2)) + ")"
 
 class LH (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "001", rd, imm, "0000011")
+        I_type.__init__(self, rs1, "001", rd, imm, "0000011", "LH")
+
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2)) + "(x" + str(int(self.rs1, 2)) + ")"
 
 class LW (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "010", rd, imm, "0000011")
+        I_type.__init__(self, rs1, "010", rd, imm, "0000011", "LW")
+
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2)) + "(x" + str(int(self.rs1, 2)) + ")"
 
 class LBU (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "100", rd, imm, "0000011")
+        I_type.__init__(self, rs1, "100", rd, imm, "0000011", "LBU")
+
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2)) + "(x" + str(int(self.rs1, 2)) + ")"
 
 class LHU (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "101", rd, imm, "0000011")
+        I_type.__init__(self, rs1, "101", rd, imm, "0000011", "LHU")
+
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2)) + "(x" + str(int(self.rs1, 2)) + ")"
 
 class SB (S_type):
     def __init__(self, rs2, rs1, imm):
-        S_type.__init__(self, rs2, rs1, "000", imm, "0100011")
+        S_type.__init__(self, rs2, rs1, "000", imm, "0100011", "SB")
 
 class SH (S_type):
     def __init__(self, rs2, rs1, imm):
-        S_type.__init__(self, rs2, rs1, "001", imm, "0100011")
+        S_type.__init__(self, rs2, rs1, "001", imm, "0100011", "SH")
 
 class SW (S_type):
     def __init__(self, rs2, rs1, imm):
-        S_type.__init__(self, rs2, rs1, "010", imm, "0100011")
+        S_type.__init__(self, rs2, rs1, "010", imm, "0100011", "SW")
 
 class ADDI (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "000", rd, imm, "0010011")
+        I_type.__init__(self, rs1, "000", rd, imm, "0010011", "ADDI")
 
 class SLTI (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "010", rd, imm, "0010011")
+        I_type.__init__(self, rs1, "010", rd, imm, "0010011", "SLTI")
 
 class SLTIU (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "011", rd, imm, "0010011")
+        I_type.__init__(self, rs1, "011", rd, imm, "0010011", "SLTIU")
 
 class XORI (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "100", rd, imm, "0010011")
+        I_type.__init__(self, rs1, "100", rd, imm, "0010011", "XORI")
 
 class ORI (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "110", rd, imm, "0010011")
+        I_type.__init__(self, rs1, "110", rd, imm, "0010011", "ORI")
 
 class ANDI (I_type):
     def __init__(self, rs1, rd, imm):
-        I_type.__init__(self, rs1, "111", rd, imm, "0010011")
+        I_type.__init__(self, rs1, "111", rd, imm, "0010011", "ANDI")
 
 class SLLI (R_type):
     def __init__(self, shamt, rs1, rd):
-        R_type.__init__(self, "0000000", shamt, rs1, "001", rd, "0010011")
+        R_type.__init__(self, "0000000", shamt, rs1, "001", rd, "0010011", "SLLI")
+
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2))  + ", x" + str(int(self.rs1, 2))  + ", " + str(int(self.rs2, 2))
 
 class SRLI (R_type):
     def __init__(self, shamt, rs1, rd):
-        R_type.__init__(self, "0000000", shamt, rs1, "101", rd, "0010011")
+        R_type.__init__(self, "0000000", shamt, rs1, "101", rd, "0010011", "SRLI")
+
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2))  + ", x" + str(int(self.rs1, 2))  + ", " + str(int(self.rs2, 2))
 
 class SRAI (R_type):
     def __init__(self, shamt, rs1, rd):
-        R_type.__init__(self, "0100000", shamt, rs1, "101", rd, "0010011")
+        R_type.__init__(self, "0100000", shamt, rs1, "101", rd, "0010011", "SRAI")
+
+    def getAssembly(self):
+        return self.instrName + " x" + str(int(self.rd, 2))  + ", x" + str(int(self.rs1, 2))  + ", " + str(int(self.rs2, 2))
 
 class ADD (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0000000", rs2, rs1, "000", rd, "0110011")
+        R_type.__init__(self, "0000000", rs2, rs1, "000", rd, "0110011", "ADD")
 
 class SUB (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0100000", rs2, rs1, "000", rd, "0110011")
+        R_type.__init__(self, "0100000", rs2, rs1, "000", rd, "0110011", "SUB")
 
 class SLL (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0000000", rs2, rs1, "001", rd, "0110011")
+        R_type.__init__(self, "0000000", rs2, rs1, "001", rd, "0110011", "SLL")
 
 class SLT (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0000000", rs2, rs1, "010", rd, "0110011")
+        R_type.__init__(self, "0000000", rs2, rs1, "010", rd, "0110011", "SLT")
 
 class SLTU (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0000000", rs2, rs1, "011", rd, "0110011")
+        R_type.__init__(self, "0000000", rs2, rs1, "011", rd, "0110011", "SLTU")
 
 class XOR (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0000000", rs2, rs1, "100", rd, "0110011")
+        R_type.__init__(self, "0000000", rs2, rs1, "100", rd, "0110011", "XOR")
 
 class SRL (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0000000", rs2, rs1, "101", rd, "0110011")
+        R_type.__init__(self, "0000000", rs2, rs1, "101", rd, "0110011", "SRL")
 
 class SRA (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0100000", rs2, rs1, "101", rd, "0110011")
+        R_type.__init__(self, "0100000", rs2, rs1, "101", rd, "0110011", "SRA")
 
 class OR (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0000000", rs2, rs1, "110", rd, "0110011")
+        R_type.__init__(self, "0000000", rs2, rs1, "110", rd, "0110011", "OR")
 
 class AND (R_type):
     def __init__(self, rs2, rs1, rd):
-        R_type.__init__(self, "0000000", rs2, rs1, "111", rd, "0110011")
+        R_type.__init__(self, "0000000", rs2, rs1, "111", rd, "0110011", "AND")
 
 
