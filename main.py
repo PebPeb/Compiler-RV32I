@@ -5,6 +5,8 @@ def main():
     #print(x.gethex())
     print(x.getAssembly())
 
+    parseRV32I("00000000000000000000000000110111")
+
 
 if __name__ == '__main__':
     main()

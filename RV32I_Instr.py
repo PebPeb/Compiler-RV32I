@@ -10,6 +10,41 @@
 
 """
 
+def parseRV32I(instr):
+    print(instr)
+    opcode = instr[25:32]
+    print(opcode)
+
+    match opcode:
+        case "0110111":         # LUI
+            pass
+        case "0010111":
+            pass
+        case "1101111":
+            pass
+        case "1100111":
+            pass
+        case "1100011":
+            pass
+        case "0000011":
+            pass
+        case "0100011":
+            pass
+        case "0010011":
+            pass
+        case "0110011":
+            pass
+        case "0001111":
+            pass
+        case "1110011":
+            pass
+
+        case _:
+            print("Invalid Opcode")
+            return
+
+
+
 class instruction:
     def __init__(self, opcode):
         self.opcode = opcode
