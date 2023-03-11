@@ -11,19 +11,41 @@
 """
 
 def parseRV32I(instr):
-    print(instr)
     opcode = instr[25:32]
-    print(opcode)
+    rd = instr[20:25]
+    funct3 = instr[17:20]
+    rs1 = instr[12:17]
+
+    imm_U = instr[0:20]
+    imm_J = instr[0] + instr[12:20] + instr[11] + instr[1:11]
+    imm_I = inst[0:12]
+    
 
     match opcode:
         case "0110111":         # LUI
-            pass
-        case "0010111":
-            pass
-        case "1101111":
-            pass
-        case "1100111":
-            pass
+            return LUI(int(rd, 2), int(imm_U, 2) << 12)
+        case "0010111":         # AUIPC
+            return AUIPC(int(rd, 2), int(imm_U, 2) << 12)
+        case "1101111":         # JAL
+            return JAL(int(rd, 2), int(imm_J, 2) << 1)
+        case "1100111":         # JALR, BEQ, BNE, BLT, BGE, BLTU, BGEU
+            match funct3:
+                case "000":     # JALR
+                    return JALR(int(rs1, 2), int(rd, 2), int(imm_I, 2))
+                case "000":
+                    pass
+                case "001":
+                    pass
+                case "100":
+                    pass
+                case "101":
+                    pass
+                case "110":
+                    pass
+                case "111":
+                    pass
+
+
         case "1100011":
             pass
         case "0000011":
@@ -143,11 +165,12 @@ class J_type (instruction):
         self.rd = "{:05b}".format(rd)[-5:]
         self.imm = "{:032b}".format(imm)[-21:]
         imm = "{:032b}".format(imm)[-21:-1]
+        self.imm = imm + "0"
         imm = imm[0] + imm[10:20] + imm[9] + imm[1:9]
         self.instr = imm + self.rd + self.opcode
     
     def getAssembly(self):
-        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2) << 1)
+        return self.instrName + " x" + str(int(self.rd, 2)) + ", " + str(int(self.imm, 2))
 
 
 # Each instruction should be a child of their specific type

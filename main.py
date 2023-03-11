@@ -1,11 +1,16 @@
 from RV32I_Instr import *
 
 def main():
-    x = SLLI(5, 3, 1) # 1048577
+    x = JAL(1, 23423) # 1048577
     #print(x.gethex())
     print(x.getAssembly())
+    print(x.gethex())
+    print(x.getbinary())
 
-    parseRV32I("00000000000000000000000000110111")
+    print()
+
+    y = parseRV32I(x.getbinary())
+    print(y.getAssembly())
 
 
 if __name__ == '__main__':
