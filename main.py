@@ -1,13 +1,9 @@
 from RV32I_Instr import *
 
 def main():
-    x = JAL(1, 23423) # 1048577
-    #print(x.gethex())
-    print(x.getAssembly())
-    print(x.gethex())
-    print(x.getbinary())
+    x = BEQ(31, 31, 12) # 1048577
 
-    print()
+    #print(x.gethex())
 
     y = parseRV32I(x.getbinary())
     print(y.getAssembly())

@@ -12,53 +12,78 @@
 
 def parseRV32I(instr):
     opcode = instr[25:32]
-    rd = instr[20:25]
+    rd = int(instr[20:25], 2)
     funct3 = instr[17:20]
-    rs1 = instr[12:17]
+    rs1 = int(instr[12:17], 2)
+    rs2 = int(instr[7:12], 2)
 
-    imm_U = instr[0:20]
-    imm_J = instr[0] + instr[12:20] + instr[11] + instr[1:11]
-    imm_I = inst[0:12]
-    
+    imm_U = int(instr[0:20], 2) << 12
+    imm_J = int(instr[0] + instr[12:20] + instr[11] + instr[1:11], 2) << 1
+    imm_I = int(instr[0:12], 2)
+    imm_B = int(instr[0] + instr[24] + instr[1:7] + instr[20:24], 2) << 1
+    imm_S = int(instr[0:7] + instr[20:25], 2)
 
     match opcode:
         case "0110111":         # LUI
-            return LUI(int(rd, 2), int(imm_U, 2) << 12)
+            return LUI(rd, imm_U)
         case "0010111":         # AUIPC
-            return AUIPC(int(rd, 2), int(imm_U, 2) << 12)
+            return AUIPC(rd, imm_U)
         case "1101111":         # JAL
-            return JAL(int(rd, 2), int(imm_J, 2) << 1)
-        case "1100111":         # JALR, BEQ, BNE, BLT, BGE, BLTU, BGEU
+            return JAL(rd, imm_J)
+        case "1100111":         # JALR
             match funct3:
-                case "000":     # JALR
-                    return JALR(int(rs1, 2), int(rd, 2), int(imm_I, 2))
-                case "000":
-                    pass
-                case "001":
-                    pass
-                case "100":
-                    pass
-                case "101":
-                    pass
-                case "110":
-                    pass
-                case "111":
-                    pass
-
-
-        case "1100011":
-            pass
+                case "000":         # JALR
+                    return JALR(rs1, rd, imm_I)
+        case "1100011":         # BEQ, BNE, BLT, BGE, BLTU, BGEU
+            match funct3:
+                case "000":         # BEQ
+                    return BEQ(rs2, rs1, imm_B)
+                case "001":         # BNE
+                    return BNE(rs2, rs1, imm_B)
+                case "100":         # BLT
+                    return BLT(rs2, rs1, imm_B)
+                case "101":         # BGE
+                    return BGE(rs2, rs1, imm_B)
+                case "110":         # BLTU
+                    return BLTU(rs2, rs1, imm_B)
+                case "111":         # BGEU
+                    return BGEU(rs2, rs1, imm_B)
         case "0000011":
-            pass
+            match funct3:
+                case "000":         # LB
+                    return LB(rs1, rd, imm_I)
+                case "001":         # LH
+                    return LH(rs1, rd, imm_I)
+                case "010":         # LW
+                    return LW(rs1, rd, imm_I)
+                case "100":         # LBU
+                    return LBU(rs1, rd, imm_I)
+                case "101":         # LHU
+                    return LHU(rs1, rd, imm_I)
         case "0100011":
-            pass
+            match funct3:
+                case "000":         #SB
+                    return SB(rs2, rs1, imm_S)
+                case "001":         #SH
+                    return SH(rs2, rs1, imm_S)
+                case "010":         #SW
+                    return SW(rs2, rs1, imm_S)
         case "0010011":
-            pass
+            match funct3:
+                case "000":         #ADDI
+                    return ADDI(rs1, rd, imm_I)
+                case "010":         #SLTI
+                    return SLTI(rs1, rd, imm_I)
+                case "011":         #SLTIU
+                    return SLTIU(rs1, rd, imm_I)
+                case "100":         #XORI
+                    return XORI(rs1, rd, imm_I)
+                case "110":         #ORI
+                    return ORI(rs1, rd, imm_I)
+                case "111":         #ANDI
+                    return ANDI(rs1, rd, imm_I)
+
         case "0110011":
-            pass
-        case "0001111":
-            pass
-        case "1110011":
             pass
 
         case _:
