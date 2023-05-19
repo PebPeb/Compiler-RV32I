@@ -1,7 +1,7 @@
 NOP
 NOP
 ADDI x10, x0, 8          ; x = 8
-ADDI x11, x0, 8          ; y = 2
+ADDI x11, x0, 16          ; y = 2
 JAL x1, 8                ; Jump to Multiply
 JAL x1, 0                ; Infinite Loop results are in x10
 NOP                      ; Start Multiply

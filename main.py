@@ -15,7 +15,7 @@ def main():
 
     for i in lines:
         i = parseAssembly_RV32I(i)
-        sys.stdout.write(f"{'':<8}{i.gethex():<15}\n")
+        sys.stdout.write(f"{i.gethex():<15}\n")
 
 
     # x = ["fe010113", "00812e23", "02010413", "00100793", "fef42223", "00200793", "fef42423", "fe042623", "fe442703", "fe842783", "00f707b3", "fef42623", "00000793", "00078513", "01c12403", "02010113", "00008067"]

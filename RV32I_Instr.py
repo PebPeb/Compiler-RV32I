@@ -579,7 +579,7 @@ def __parse_RV32I_assembly_raw(instr):
 
     def parse_B_type(instr):
         if (int(instr[3]) < 0):
-            instr[3] = int(decimal_to_twos_complement(int(instr[3]), 12), 2)
+            instr[3] = int(decimal_to_twos_complement(int(instr[3]), 13), 2)
         else:
             instr[3] = int(instr[3])
 
@@ -712,9 +712,9 @@ def __parse_RV32I_assembly_raw(instr):
         case "NOP":
             return ADDI(0, 0, 0)    
         case "MV":
-            return ADDI(int(instr[1][1:]), int(instr[2][1:]),  0)    
+            return ADDI(int(instr[2][1:]), int(instr[1][1:]),  0)    
         case "CLR":     
-            return ADDI(int(instr[1][1:]), 0, 0)
+            return ADDI(0, int(instr[1][1:]), 0)
 
 
 def decimal_to_twos_complement(number, num_bits):
