@@ -1,11 +1,8 @@
-from RV32I_Instr import *
+from rv32i.RV32I_Instr import *
 import sys
 
-
-
-
 def main():
-
+    """
     lines = []
     with open("./Test.rv32i", 'r') as file:
         for line in file:
@@ -16,14 +13,12 @@ def main():
     for i in lines:
         i = parseAssembly_RV32I(i)
         sys.stdout.write(f"{i.gethex():<15}\n")
-
-
-    # x = ["fe010113", "00812e23", "02010413", "00100793", "fef42223", "00200793", "fef42423", "fe042623", "fe442703", "fe842783", "00f707b3", "fef42623", "00000793", "00078513", "01c12403", "02010113", "00008067"]
-
-    # for i in x:
-    #     i = parseHex_RV32I(i)
-    #     sys.stdout.write(f"{'':<8}{str(i):<15}\n")
-
+    """
+    x = ["fe010113", "00812e23", "02010413", "00800793", "fef42623", "00200793", "fef42423", "fec42703", "fe842783", "00f707b3", "fef42223", "fe442783", "00078513", "01c12403", "02010113", "00008067"]
+    
+    for i in x:
+        i = parseHex_RV32I(i)
+        sys.stdout.write(f"{'':<8}{str(i):<15}\n")
 
 
 

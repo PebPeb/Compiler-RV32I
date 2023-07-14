@@ -1,6 +1,6 @@
 """
     A rudimentary compiler for my RV32I Single Cycle CPU 
-    this is meant to compile the most basic Asembly for the
+    this is meant to compile the most basic Assembly for the
     processor.
 
     Created By: Bryce Keen
