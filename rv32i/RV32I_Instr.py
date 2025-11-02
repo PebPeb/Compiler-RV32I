@@ -11,10 +11,13 @@
 """
 import re
 
+COMMANDSPACING = 0
+
 class instruction:
-    def __init__(self, opcode):
+    def __init__(self, opcode, upperCase):
         self.opcode = opcode
         self.instr = None
+        self.upperCase = upperCase
         
     def getbinary(self, endian="big"):
         if endian == "big":
@@ -42,7 +45,7 @@ class instruction:
 
 class R_type(instruction):
     def __init__(self, funct7, rs2, rs1, funct3, rd, opcode, instrName, upperCase=False):
-        instruction.__init__(self, opcode)
+        instruction.__init__(self, opcode, upperCase)
         self.instrName = instrName
         self.funct7 = funct7
         self.rs2 = "{:05b}".format(rs2)[-5:]
@@ -50,8 +53,6 @@ class R_type(instruction):
         self.funct3 = funct3
         self.rd = "{:05b}".format(rd)[-5:]
         self.instr = self.funct7 + self.rs2 + self.rs1 + self.funct3 + self.rd + self.opcode
-
-        self.upperCase = upperCase
 
     def getAssembly(self):
         if (self.upperCase):
@@ -63,7 +64,7 @@ class R_type(instruction):
         rs1 = "x" + str(int(self.rs1, 2))
         rs2 = "x" + str(int(self.rs2, 2))
 
-        return f"{instrName:<10}" + " " + rd + "," + rs1 + "," + rs2
+        return f"{instrName:<{COMMANDSPACING}}" + " " + rd + "," + rs1 + "," + rs2
 
 class R_type_shift(R_type):
     def __init__(self, funct7, rs2, rs1, funct3, rd, opcode, instrName, upperCase=False):
@@ -79,12 +80,12 @@ class R_type_shift(R_type):
         rs1 = "x" + str(int(self.rs1, 2))
         shamt = str(int(self.rs2, 2))
 
-        return f"{instrName:<10}" + " " + rd + "," + rs1 + "," + shamt
+        return f"{instrName:<{COMMANDSPACING}}" + " " + rd + "," + rs1 + "," + shamt
 
 
 class I_type (instruction):
     def __init__(self, rs1, funct3, rd, imm, opcode, instrName, signed=False, upperCase=False):
-        instruction.__init__(self, opcode)
+        instruction.__init__(self, opcode, upperCase)
         self.instrName = instrName
         self.imm = "{:032b}".format(imm)[-12:]
         self.rs1 = "{:05b}".format(rs1)[-5:]
@@ -93,7 +94,6 @@ class I_type (instruction):
         self.instr = self.imm + self.rs1 + self.funct3 + self.rd + self.opcode
         
         self.signed = signed
-        self.upperCase = upperCase
 
     def getAssembly(self):
         if (self.upperCase):
@@ -108,7 +108,7 @@ class I_type (instruction):
         else:
             imm = str(int(self.imm, 2))
 
-        return f"{instrName:<10}" + " " + rd + "," + rs1 + "," + imm
+        return f"{instrName:<{COMMANDSPACING}}" + " " + rd + "," + rs1 + "," + imm
 
 class I_type_load (I_type):
     def __init__(self, rs1, funct3, rd, imm, opcode, instrName, signed=False, upperCase=False):
@@ -127,12 +127,12 @@ class I_type_load (I_type):
         else:
             imm = str(int(self.imm, 2))
 
-        return f"{instrName:<10}" + " " + rd + "," + imm + "(" + rs1 + ")" 
+        return f"{instrName:<{COMMANDSPACING}}" + " " + rd + "," + imm + "(" + rs1 + ")" 
 
 
 class S_type (instruction):
     def __init__(self, rs2, rs1, funct3, imm, opcode, instrName, signed=False, upperCase=False):
-        instruction.__init__(self, opcode)
+        instruction.__init__(self, opcode, upperCase)
         self.instrName = instrName
         self.imm = "{:032b}".format(imm)[-12:]
         self.rs2 = "{:05b}".format(rs2)[-5:]
@@ -141,7 +141,6 @@ class S_type (instruction):
         self.instr = self.imm[0:7] + self.rs2 + self.rs1 + self.funct3 + self.imm[7:12] + self.opcode
         
         self.signed = signed
-        self.upperCase = upperCase
 
     def getAssembly(self):
         if (self.upperCase):
@@ -155,12 +154,12 @@ class S_type (instruction):
         else:
             imm = str(int(self.imm, 2))
 
-        return f"{instrName:<10}" + " " + rs2 + "," + imm + "(" + rs1 + ")" 
+        return f"{instrName:<{COMMANDSPACING}}" + " " + rs2 + "," + imm + "(" + rs1 + ")" 
 
 
 class B_type (instruction):
     def __init__(self, rs2, rs1, funct3, imm, opcode, instrName, upperCase=False):
-        instruction.__init__(self, opcode)
+        instruction.__init__(self, opcode, upperCase)
         self.instrName = instrName
         self.imm = "{:032b}".format(imm)[-13:-1]
         self.rs2 = "{:05b}".format(rs2)[-5:]
@@ -168,8 +167,6 @@ class B_type (instruction):
         self.funct3 = funct3
         self.instr = self.imm[0] + self.imm[2:8] + self.rs2 + self.rs1 + self.funct3 + self.imm[8:12] + self.imm[1] + self.opcode
     
-        self.upperCase = upperCase
-
     def getAssembly(self):
         if (self.upperCase):
             instrName = self.instrName.upper()
@@ -180,17 +177,15 @@ class B_type (instruction):
         rs2 = "x" + str(int(self.rs2, 2))
         imm = str(int(self.imm, 2) << 1)
 
-        return f"{instrName:<10}" + " " + rs1 + "," + rs2 + "," + imm
+        return f"{instrName:<{COMMANDSPACING}}" + " " + rs1 + "," + rs2 + "," + imm
 
 class U_type (instruction):
     def __init__(self, rd, imm, opcode, instrName, upperCase=False):
-        instruction.__init__(self, opcode)
+        instruction.__init__(self, opcode, upperCase)
         self.instrName = instrName
         self.rd = "{:05b}".format(rd)[-5:]
         self.imm = "{:032b}".format(imm)[:20]
         self.instr = self.imm + self.rd + self.opcode
-
-        self.upperCase = upperCase
 
     def getAssembly(self):
         if (self.upperCase):
@@ -201,11 +196,11 @@ class U_type (instruction):
         rd = "x" + str(int(self.rd, 2))
         imm = str(int(self.imm, 2) << 12)
 
-        return f"{instrName:<10}" + " " + rd + "," + imm
+        return f"{instrName:<{COMMANDSPACING}}" + " " + rd + "," + imm
 
 class J_type (instruction):
     def __init__(self, rd, imm, opcode, instrName, upperCase=False):
-        instruction.__init__(self, opcode)
+        instruction.__init__(self, opcode, upperCase)
         self.instrName = instrName
         self.rd = "{:05b}".format(rd)[-5:]
         self.imm = "{:032b}".format(imm)[-21:]
@@ -214,8 +209,6 @@ class J_type (instruction):
         imm = imm[0] + imm[10:20] + imm[9] + imm[1:9]
         self.instr = imm + self.rd + self.opcode
     
-        self.upperCase = upperCase
-
     def getAssembly(self):
         if (self.upperCase):
             instrName = self.instrName.upper()
@@ -225,7 +218,7 @@ class J_type (instruction):
         rd = "x" + str(int(self.rd, 2))
         imm = str(int(self.imm, 2))
 
-        return f"{instrName:<10}" + " " + rd + "," + imm
+        return f"{instrName:<{COMMANDSPACING}}" + " " + rd + "," + imm
 
 
 # Each instruction should be a child of their specific type
@@ -255,7 +248,7 @@ class BNE (B_type):
         B_type.__init__(self, rs2, rs1, "001", imm, "1100011", "BNE")
 
 class BLT (B_type):
-    def __init__(self, rs2, rs1, imm):
+    def __init__(self, rs2, rs1, imm):upperCase
         B_type.__init__(self, rs2, rs1, "100", imm, "1100011", "BLT")
 
 class BGE (B_type):
@@ -388,7 +381,7 @@ def twos_comp(val, bits):
     return val                         # return positive value as is
 
 
-def parseHex_RV32I(instr):
+def parseHex_RV32I(instr, upperCase=False):
     if (instr[:2] == '0x'):
         instr = instr[2:]
 
@@ -396,7 +389,7 @@ def parseHex_RV32I(instr):
         print("Error Instruction needs to be 32 bits long")
         exit()
 
-    return __parse_RV32I_bin("{:032b}".format(int(instr, 16)))
+    return __parse_RV32I_bin("{:032b}".format(int(instr, 16), upperCase))
 
 def parseBin_RV32I(instr):
     if (instr[:2] == '0b'):
@@ -409,7 +402,7 @@ def parseBin_RV32I(instr):
     return __parse_RV32I_bin(instr)
 
 
-def __parse_RV32I_bin(instr):
+def __parse_RV32I_bin(instr, upperCase=False):
     opcode = instr[25:32]
     rd = int(instr[20:25], 2)
     funct3 = instr[17:20]
@@ -424,120 +417,125 @@ def __parse_RV32I_bin(instr):
     imm_B = int(instr[0] + instr[24] + instr[1:7] + instr[20:24], 2) << 1
     imm_S = int(instr[0:7] + instr[20:25], 2)
 
+    parsedInstruction = None
     match opcode:
         case "0110111":         # LUI
-            return LUI(rd, imm_U)
+            parsedInstruction = LUI(rd, imm_U)
         case "0010111":         # AUIPC
-            return AUIPC(rd, imm_U)
+            parsedInstruction =  AUIPC(rd, imm_U)
         case "1101111":         # JAL
-            return JAL(rd, imm_J)
+            parsedInstruction =  JAL(rd, imm_J)
         case "1100111":         # JALR
             match funct3:
                 case "000":         # JALR
-                    return JALR(rs1, rd, imm_I)
+                    parsedInstruction =  JALR(rs1, rd, imm_I)
         case "1100011":         # BEQ, BNE, BLT, BGE, BLTU, BGEU
             match funct3:
                 case "000":         # BEQ
-                    return BEQ(rs2, rs1, imm_B)
+                    parsedInstruction =  BEQ(rs2, rs1, imm_B)
                 case "001":         # BNE
-                    return BNE(rs2, rs1, imm_B)
+                    parsedInstruction =  BNE(rs2, rs1, imm_B)
                 case "100":         # BLT
-                    return BLT(rs2, rs1, imm_B)
+                    parsedInstruction =  BLT(rs2, rs1, imm_B)
                 case "101":         # BGE
-                    return BGE(rs2, rs1, imm_B)
+                    parsedInstruction =  BGE(rs2, rs1, imm_B)
                 case "110":         # BLTU
-                    return BLTU(rs2, rs1, imm_B)
+                    parsedInstruction =  BLTU(rs2, rs1, imm_B)
                 case "111":         # BGEU
-                    return BGEU(rs2, rs1, imm_B)
+                    parsedInstruction =  BGEU(rs2, rs1, imm_B)
         case "0000011":
             match funct3:
                 case "000":         # LB
-                    return LB(rs1, rd, imm_I)
+                    parsedInstruction =  LB(rs1, rd, imm_I)
                 case "001":         # LH
-                    return LH(rs1, rd, imm_I)
+                    parsedInstruction =  LH(rs1, rd, imm_I)
                 case "010":         # LW
-                    return LW(rs1, rd, imm_I)
+                    parsedInstruction =  LW(rs1, rd, imm_I)
                 case "100":         # LBU
-                    return LBU(rs1, rd, imm_I)
+                    parsedInstruction =  LBU(rs1, rd, imm_I)
                 case "101":         # LHU
-                    return LHU(rs1, rd, imm_I)
+                    parsedInstruction =  LHU(rs1, rd, imm_I)
         case "0100011":
             match funct3:
                 case "000":         #SB
-                    return SB(rs2, rs1, imm_S)
+                    parsedInstruction =  SB(rs2, rs1, imm_S)
                 case "001":         #SH
-                    return SH(rs2, rs1, imm_S)
+                    parsedInstruction =  SH(rs2, rs1, imm_S)
                 case "010":         #SW
-                    return SW(rs2, rs1, imm_S)
+                    parsedInstruction =  SW(rs2, rs1, imm_S)
         case "0010011":
             match funct3:
                 case "000":         #ADDI
-                    return ADDI(rs1, rd, imm_I)
+                    parsedInstruction =  ADDI(rs1, rd, imm_I)
                 case "010":         #SLTI
-                    return SLTI(rs1, rd, imm_I)
+                    parsedInstruction =  SLTI(rs1, rd, imm_I)
                 case "011":         #SLTIU
-                    return SLTIU(rs1, rd, imm_I)
+                    parsedInstruction =  SLTIU(rs1, rd, imm_I)
                 case "100":         #XORI
-                    return XORI(rs1, rd, imm_I)
+                    parsedInstruction =  XORI(rs1, rd, imm_I)
                 case "110":         #ORI
-                    return ORI(rs1, rd, imm_I)
+                    parsedInstruction =  ORI(rs1, rd, imm_I)
                 case "111":         #ANDI
-                    return ANDI(rs1, rd, imm_I)
+                    parsedInstruction =  ANDI(rs1, rd, imm_I)
                 case "001":
                     match funct7:
                         case "0000000":     # SLLI
-                            return SLLI(shamt, rs1, rd)
+                            parsedInstruction =  SLLI(shamt, rs1, rd)
                 case "101":         
                     match funct7:      
                         case "0000000":     # SRLI
-                            return SRLI(shamt, rs1, rd)
+                            parsedInstruction =  SRLI(shamt, rs1, rd)
                         case "0100000":     # SRAI
-                            return SRAI(shamt, rs1, rd)
+                            parsedInstruction =  SRAI(shamt, rs1, rd)
         case "0110011":
             match funct3:
                 case "000":         #ADD
                     match funct7:
                         case "0000000":
-                            return ADD(rs2, rs1, rd)
+                            parsedInstruction =  ADD(rs2, rs1, rd)
                 case "000":         #SUB
                     match funct7:
                         case "0100000":
-                            return SUB(rs2, rs1, rd)
+                            parsedInstruction =  SUB(rs2, rs1, rd)
                 case "001":         #SLL
                     match funct7:
                         case "0000000":
-                            return SLL(rs2, rs1, rd)
+                            parsedInstruction =  SLL(rs2, rs1, rd)
                 case "010":         #SLT
                     match funct7:
                         case "0000000":
-                            return SLT(rs2, rs1, rd)
+                            parsedInstruction =  SLT(rs2, rs1, rd)
                 case "011":         #SLTU
                     match funct7:
                         case "0000000":
-                            return SLTU(rs2, rs1, rd)
+                            parsedInstruction =  SLTU(rs2, rs1, rd)
                 case "100":         #XOR
                     match funct7:
                         case "0000000":
-                            return XOR(rs2, rs1, rd)
+                            parsedInstruction =  XOR(rs2, rs1, rd)
                 case "101":         #SRL
                     match funct7:
                         case "0000000":
-                            return SRL(rs2, rs1, rd)
+                            parsedInstruction =  SRL(rs2, rs1, rd)
                 case "101":         #SRA
                     match funct7:
                         case "0100000":
-                            return SRA(rs2, rs1, rd)
+                            parsedInstruction =  SRA(rs2, rs1, rd)
                 case "110":         #OR
                     match funct7:
                         case "0000000":
-                            return OR(rs2, rs1, rd)
+                            parsedInstruction =  OR(rs2, rs1, rd)
                 case "111":         #AND
                     match funct7: 
                         case "0000000":
-                            return AND(rs2, rs1, rd)
+                            parsedInstruction =  AND(rs2, rs1, rd)
         case _:
             print("Invalid Opcode")
             return
+        
+    
+    parsedInstruction.upperCase = upperCase
+    return parsedInstruction
 
 
 def parseAssembly_RV32I(instr):
