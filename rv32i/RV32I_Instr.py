@@ -389,7 +389,7 @@ def parseHex_RV32I(instr, upperCase=False):
         print("Error Instruction needs to be 32 bits long")
         exit()
 
-    return __parse_RV32I_bin("{:032b}".format(int(instr, 16), upperCase))
+    return __parse_RV32I_bin("{:032b}".format(int(instr, 16)), upperCase)
 
 def parseBin_RV32I(instr):
     if (instr[:2] == '0b'):
@@ -533,8 +533,8 @@ def __parse_RV32I_bin(instr, upperCase=False):
             print("Invalid Opcode")
             return
         
-    
-    parsedInstruction.upperCase = upperCase
+    if parsedInstruction != None:
+        parsedInstruction.upperCase = upperCase
     return parsedInstruction
 
 
