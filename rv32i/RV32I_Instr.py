@@ -248,7 +248,7 @@ class BNE (B_type):
         B_type.__init__(self, rs2, rs1, "001", imm, "1100011", "BNE")
 
 class BLT (B_type):
-    def __init__(self, rs2, rs1, imm):upperCase
+    def __init__(self, rs2, rs1, imm):
         B_type.__init__(self, rs2, rs1, "100", imm, "1100011", "BLT")
 
 class BGE (B_type):
