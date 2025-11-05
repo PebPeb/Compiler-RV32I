@@ -175,7 +175,7 @@ class B_type (instruction):
 
         rs1 = "x" + str(int(self.rs1, 2))
         rs2 = "x" + str(int(self.rs2, 2))
-        imm = str(int(self.imm, 2) << 1)
+        imm = str(twos_comp(int(self.imm, 2) << 1, 13))
 
         return f"{instrName:<{COMMANDSPACING}}" + " " + rs1 + "," + rs2 + "," + imm
 
